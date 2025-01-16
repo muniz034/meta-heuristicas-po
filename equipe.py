@@ -26,6 +26,18 @@ class Equipe:
 
         return tempo
 
+    def busca_tarefa(self, tempo_inicial):
+        tarefa = None
+        index = -1
+
+        for i in range(len(self.tarefas)):
+            if self.tarefas[i].inicio == tempo_inicial:
+                tarefa = self.tarefas[i]
+                index = i
+                break
+
+        return index, tarefa
+
     def __str__(self):
         return f'{self.id}'
 

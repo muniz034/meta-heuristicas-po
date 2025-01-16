@@ -10,7 +10,7 @@ random.seed(datetime.now().timestamp())
 class Gerador:
     def __init__(self, n_tarefas):
         self.n_tarefas = n_tarefas
-        self.n_equipes = math.ceil(n_tarefas / 3)
+        self.n_equipes = math.ceil(n_tarefas / 4)
         self.equipes = []
         self.tarefas = []
         self.gera_equipes()

@@ -1,6 +1,7 @@
 import copy
 import math
 import random
+import time
 from copy import deepcopy
 
 from atribuicao import Atribuicao
@@ -40,41 +41,57 @@ class Algoritmo:
 
     @staticmethod
     def simulated_annealing(atribuicao_inicial, parametros):
-        atribuicao_inicial = deepcopy(atribuicao_inicial)
+        start = time.time()
 
+        # Define s
+        s = deepcopy(atribuicao_inicial)
+
+        # Define IterT
         m = len(atribuicao_inicial.equipes)
         n = len(atribuicao_inicial.tarefas)
 
         n_iteracoes = math.ceil(m * n * parametros.k)
 
+        # Melhor solução obtida até então
+        s_estrela = deepcopy(atribuicao_inicial)
+
+        # Temperatura corrente
         temperatura = parametros.temperatura_inicial
 
-        s_l = atribuicao_inicial
-        custo_atual = s_l.custo_total()
+        qtd_vezes_aceita = 0
 
-        melhor_solucao = deepcopy(s_l)
-        melhor_custo = custo_atual
+        # print(f"\nIniciando Simulated Annealing com os parametros: ")
+        # print(f"\t Temperatura Inicial: {temperatura}")
+        # print(f"\t Temperatura Final: {parametros.temperatura_minima}")
+        # print(f"\t Nº de Iterações por Temperatura: {n_iteracoes}\n")
 
         while temperatura > parametros.temperatura_minima:
             for _ in range(n_iteracoes):
-                vizinho = s_l.first_improvement()
 
-                custo_vizinho = vizinho.custo_total()
+                # Gere um vizinho qualquer de s
+                s_l = s.random_descent()
 
-                delta = custo_vizinho - custo_atual
+                # Define delta
+                delta = s_l.custo_total() - s.custo_total()
 
-                x = random.random()
+                if delta < 0:
+                    s = s_l
+                    if s_l.custo_total() < s_estrela.custo_total():
+                        s_estrela = s_l
+                else:
+                    x = random.random()
+                    if x < math.exp(-delta / temperatura):
+                        qtd_vezes_aceita = qtd_vezes_aceita + 1
+                        s = s_l
 
-                if delta < 0 or x < math.exp(-delta / temperatura):
-                    s_l = vizinho
-                    custo_atual = custo_vizinho
+            # Resfriamento
+            temperatura *= parametros.alpha
 
-                    # Atualizar a melhor solução
-                    if custo_atual < melhor_custo:
-                        melhor_solucao = s_l
-                        melhor_custo = custo_atual
+        s = s_estrela
 
-            temperatura *= parametros.alpha  # Resfriamento
-            # print(f"R${melhor_custo} : {temperatura}")
+        # print(f"\nTask Count: {len(atribuicao_inicial.tarefas)}")
+        # print(f"Time Elapsed: {round(time.time() - start, 3)}s")
+        # print(f"Initial Cost: R${round(atribuicao_inicial.custo_total(), 2)}")
+        # print(f"Final Cost: R${round(s.custo_total(), 2)}")
 
-        return melhor_solucao
+        return round(time.time() - start, 3), s
