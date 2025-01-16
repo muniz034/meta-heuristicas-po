@@ -1,6 +1,7 @@
 import copy
-from random import randint
-
+from copy import deepcopy
+import random
+from datetime import datetime
 
 class Atribuicao:
     def __init__(self, equipes=None, tarefas=None):
@@ -72,13 +73,15 @@ class Atribuicao:
         return atribuicao_atual
 
     def random_descent(self):
+        random.seed(datetime.now().timestamp())
+
         atribuicao_atual = copy.deepcopy(self)
 
         realoca = False
         n = 0
 
         while realoca == False and n < 1000:
-            i = randint(0, len(atribuicao_atual.equipes) - 1)
+            i = random.randint(0, len(atribuicao_atual.equipes) - 1)
 
             equipe = atribuicao_atual.equipes[i]
 
@@ -96,7 +99,7 @@ class Atribuicao:
                     if len(equipes) == 0:
                         continue
 
-                    k = randint(0, len(equipes) - 1)
+                    k = random.randint(0, len(equipes) - 1)
                     index, tarefa = equipes[k].busca_tarefa(j)
 
                     atribuicao_atual.equipes[i].tarefas.append(tarefa)
@@ -105,6 +108,17 @@ class Atribuicao:
                     realoca = True
 
         return atribuicao_atual
+
+    def pertubacao(self, nivel):
+        s_l = deepcopy(self)
+        n_modificacoes = nivel + 1
+        cont = 1
+
+        while cont <= n_modificacoes:
+            s_l = s_l.random_descent()
+            cont = cont + 1
+
+        return s_l
 
     def __str__(self):
         result = "Atribuições: \n"

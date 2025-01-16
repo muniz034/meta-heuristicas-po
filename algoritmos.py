@@ -58,13 +58,6 @@ class Algoritmo:
         # Temperatura corrente
         temperatura = parametros.temperatura_inicial
 
-        qtd_vezes_aceita = 0
-
-        # print(f"\nIniciando Simulated Annealing com os parametros: ")
-        # print(f"\t Temperatura Inicial: {temperatura}")
-        # print(f"\t Temperatura Final: {parametros.temperatura_minima}")
-        # print(f"\t Nº de Iterações por Temperatura: {n_iteracoes}\n")
-
         while temperatura > parametros.temperatura_minima:
             for _ in range(n_iteracoes):
 
@@ -81,7 +74,6 @@ class Algoritmo:
                 else:
                     x = random.random()
                     if x < math.exp(-delta / temperatura):
-                        qtd_vezes_aceita = qtd_vezes_aceita + 1
                         s = s_l
 
             # Resfriamento
@@ -89,9 +81,33 @@ class Algoritmo:
 
         s = s_estrela
 
-        # print(f"\nTask Count: {len(atribuicao_inicial.tarefas)}")
-        # print(f"Time Elapsed: {round(time.time() - start, 3)}s")
-        # print(f"Initial Cost: R${round(atribuicao_inicial.custo_total(), 2)}")
-        # print(f"Final Cost: R${round(s.custo_total(), 2)}")
+        return round(time.time() - start, 3), s
+
+    @staticmethod
+    def ils(atribuicao_inicial, parametros):
+        start = time.time()
+
+        # Define s0
+        s0 = deepcopy(atribuicao_inicial)
+
+        # Define s
+        s = s0.first_improvement()
+
+        # Define Iter, MelhorIter e nivel
+        i = 0
+        melhor_iter = i
+        nivel = 1
+
+        while i - melhor_iter < parametros.ils_max:
+            i = i + 1
+            s_l = s.pertubacao(nivel)
+            s_ll = s_l.first_improvement()
+
+            if s_ll.custo_total() < s.custo_total():
+                s = s_ll
+                melhor_iter = i
+                nivel = 1
+            else:
+                nivel = nivel + 1
 
         return round(time.time() - start, 3), s
